@@ -1,0 +1,27 @@
+{% extends "template.html" %}
+
+{% block body %}
+<div class="container">
+    <h1 class="title">Lab 2: Custom Scan Result</h1>
+    <article class="message">
+        <div class="message-header">
+            <p>Instructions</p>
+        </div>
+        <div class="message-body">
+            If you clicked on Lab 2 from the menu, you should see that there is an extra parameter (user) that was passed into
+            the GET request. For the purpose of this lab, let's assume the value represents an employee ID number and is therefore
+            sensitive. Look inside your proxy history and you will see a request to ronin-analytics.wtf, the fictitious
+            analytics company our lab uses. By default our interception proxy does not recognize the leakage of an employee ID
+            number to a third-party domain as a problem. Let's build a simple extension to fix this.
+        </div>
+    </article>
+</div>
+{% endblock %}
+
+
+{% block script %}
+
+<script>
+  axios.get('http://ronin-analytics.wtf').then((response) => {});
+</script>
+{% endblock %}

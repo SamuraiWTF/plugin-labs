@@ -1,0 +1,119 @@
+{% extends "template.html" %}
+
+{% block body %}
+<div class="container">
+    <h1 class="title">Lab 1: Two-Phase Auth</h1>
+    <article class="message">
+        <div class="message-header">
+            <p>Instructions</p>
+        </div>
+        <div class="message-body">
+            Below is a login form that works in a strange way, in an attempt to reduce the risk of automated attacks against the form. Try logging in with any username and password while observing the request(s) in your proxy.
+            Once you understand how the login mechanism works, see if you can come up with a way to find at least two valid usernames. Then find a way to use a password list to search for any valid username and password combination.
+            Hint: One valid username is "test", but it is unlikely that the password for this user will be in your password list.
+        </div>
+    </article>
+    <div class="columns is-centered">
+        <div class="column is-5-tablet is-4-desktop is-3-widescreen">
+            <form action="" class="box">
+                <div class="field">
+                    <label for="username" class="label">Username</label>
+                    <div class="control has-icons-left">
+                        <input id="username" type="text" placeholder="e.g. admin" class="input" required>
+                        <span class="icon is-small is-left">
+                  <i class="fa fa-envelope"></i>
+                </span>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="password" class="label">Password</label>
+                    <div class="control has-icons-left">
+                        <input id="password" type="password" placeholder="*******" class="input" required>
+                        <span class="icon is-small is-left">
+                  <i class="fa fa-lock"></i>
+                </span>
+                    </div>
+                </div>
+                <div class="field">
+                    <button id="login" class="button is-success">
+                        Login
+                    </button>
+                </div>
+            </form>
+            <article id="success-message" class="message is-success is-hidden">
+                <div class="message-header">
+                    <p>Success</p>
+                    <button class="delete" aria-label="delete" onclick="document.getElementById('success-message').classList.add('is-hidden');"></button>
+                </div>
+                <div class="message-body">
+                    You have successfully logged in.
+                </div>
+            </article>
+
+            <article id="failure-message" class="message is-danger is-hidden">
+                <div class="message-header">
+                    <p>Failure</p>
+                    <button class="delete" aria-label="delete" onclick="document.getElementById('failure-message').classList.add('is-hidden');"></button>
+                </div>
+                <div class="message-body">
+                    The login attempt failed. Please try again!
+                </div>
+            </article>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+
+
+{% block script %}
+
+<script>
+  let nonce = 0;
+
+  document.getElementById("username").addEventListener('blur', function(e){
+    console.log("Getting nonce for username ", e.target.value);
+    if(e.target.value) {
+      axios.get('/api/lab1/user/' + e.target.value)
+        .then((response) => {
+          if (response.data.nonce) {
+            nonce = response.data.nonce;
+            console.log("Nonce: " + nonce);
+          } else {
+            nonce = 0;
+          }
+        });
+    }
+
+  }, false);
+
+  document.getElementById("username").addEventListener('focus', function(e){
+    document.getElementById("failure-message").classList.add('is-hidden');
+    document.getElementById("success-message").classList.add('is-hidden');
+  }, false);
+
+  document.getElementById("login").addEventListener('click', function(e) {
+    e.preventDefault();
+    console.log("Clicked button");
+    let loginForm = {nonce: nonce, password: document.getElementById("password").value};
+    console.log("Sending form: ", loginForm);
+    axios.post('/api/lab1/login', loginForm).then((response) => {
+      console.log("Response", response.data);
+      if (response.data.success) {
+        document.getElementById("success-message").classList.remove("is-hidden");
+      } else {
+        document.getElementById("failure-message").classList.remove("is-hidden");
+      }
+    })
+  }, false);
+  // axios.get('/users')
+  //   .then((response) => {
+  //     console.log(response.data);
+  //     console.log(response.status);
+  //     console.log(response.statusText);
+  //     console.log(response.headers);
+  //     console.log(response.config);
+  //   });
+</script>
+{% endblock %}
